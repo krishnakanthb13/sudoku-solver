@@ -12,6 +12,7 @@ A lightning-fast, modern Sudoku solver and validator featuring real-time conflic
 *   **Real-time Validation**: Detects conflicts (duplicate numbers in rows, cols, boxes) as you type.
 *   **Dark Mode**: Fully supported dark/light themes that persist across sessions.
 *   **History**: Automatically saves solved puzzles. Restore them anytime.
+*   **Log Export**: Save your solution history to a text file for record-keeping.
 *   **Responsive Design**: Works perfectly on desktop and mobile.
 
 ## 🛠️ Built With

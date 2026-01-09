@@ -18,6 +18,7 @@ Sudoku Master is a modern, web-based tool designed to help you solve, validate, 
 ### 3. Game History
 - **Tracking**: Every time you solve a puzzle, it's saved to your local history.
 - **Restore**: You can open the History menu (clock icon) to view past solutions and restore them to the board for review.
+- **Export**: Save your entire history of solved puzzles to a `sudoku_solver_logs.txt` file for offline reference.
 
 ### 4. Customization
 - **Sizes**: Switch between standard **9x9** and easier **6x6** grids.
