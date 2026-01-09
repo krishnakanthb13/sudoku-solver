@@ -27,7 +27,7 @@ const HistoryModal: React.FC<HistoryModalProps> = ({
 }) => {
   if (!isOpen) return null;
 
-  const handleSaveLogs = () => {
+  const handleSaveLogs = async () => {
     let logContent = "Sudoku Solver - Execution History Logs\n";
     logContent += "=======================================\n\n";
 
@@ -43,10 +43,38 @@ const HistoryModal: React.FC<HistoryModalProps> = ({
         logContent += `  ${row.map(cell => cell === 0 ? '.' : cell).join(' ')}\n`;
       });
 
-      logContent += `---------------------------------------\n`;
+      logContent += `\n---------------------------------------\n\n`;
     });
 
     const blob = new Blob([logContent], { type: 'text/plain' });
+
+    // Use File System Access API if available
+    try {
+      // @ts-ignore - window.showSaveFilePicker is not yet in all TS lib definitions
+      if (window.showSaveFilePicker) {
+        // @ts-ignore
+        const handle = await window.showSaveFilePicker({
+          suggestedName: 'sudoku_solver_logs.txt',
+          types: [{
+            description: 'Text Files',
+            accept: { 'text/plain': ['.txt'] },
+          }],
+        });
+        const writable = await handle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+        return;
+      }
+    } catch (err: any) {
+      // User cancelled or other error, fallback to default download if not a cancellation
+      if (err.name !== 'AbortError') {
+        console.error('File Save Error:', err);
+      } else {
+        return; // User cancelled, do nothing
+      }
+    }
+
+    // Fallback for browsers without File System Access API
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
