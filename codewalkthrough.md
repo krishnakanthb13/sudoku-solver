@@ -34,6 +34,7 @@ The primary goal of the recent updates was to transform the Sudoku Solver from a
     - **Reverse Chronological Order**: Ensures that the newest solves are always displayed at the top of the history modal.
     - **Integration**: Coordinates the logic between the Sudoku engine and UI components.
     - **Handlers**: `handleGenerate` takes modal output, calls the generation engine, and updates the board.
+    - **Hint System**: `handleHint` solves the puzzle silently and fills the first empty cell, providing a helpful nudge without revealing the full solution.
 
 - **types.ts**
   - **Purpose**: Centralized type definitions.
@@ -54,12 +55,14 @@ The primary goal of the recent updates was to transform the Sudoku Solver from a
 
 - **HistoryModal.tsx**
   - **Purpose**: Pop-up for viewing and restoring past solved games.
+  - **UX Enhancement**: Implements scroll lock to prevent body scrolling while modal is open.
 
 - **GeneratorModal.tsx**
   - **Purpose**: User selection pop-up for creating new puzzles.
   - **Functionality**: 
     - Manages local state for size and difficulty selection.
     - Uses modern radio-style toggles for a premium UX.
+    - Implements scroll lock to prevent body scrolling while modal is open.
 
 ### /services
 *Pure logic and algorithms.*

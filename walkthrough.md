@@ -15,7 +15,11 @@ Sudoku Master is a modern, web-based tool designed to help you solve, validate, 
 - **Solve Button**: Stuck on a puzzle? Click "Solve" to instantly fill the grid with the correct solution.
 - **Performance**: The solver uses advanced algorithms to crack even the hardest puzzles in milliseconds.
 
-### 3. Random Generator
+### 3. Hint Feature
+- **Hint Button**: Need a nudge? Click the "Hint" button to reveal one correct cell from the solution.
+- **How it Works**: The app solves the puzzle in the background and fills in the first empty cell for you.
+
+### 4. Random Generator
 - **New Game Button**: Click the "New" button (sparkle icon) to open the generator selection.
 - **Difficulty Selection**: 
     - **Easy**: More clues for a straightforward solve.
@@ -24,14 +28,14 @@ Sudoku Master is a modern, web-based tool designed to help you solve, validate, 
 - **Size Selection**: Choose between **6x6** or **9x9** using the radio-style buttons.
 - **Instant Generation**: The app builds a valid, solvable board instantly based on your choices.
 
-### 4. Solved History Logs
+### 5. Solved History Logs
 - **Tracking**: Every time you solve a puzzle, it's saved to your local history with professional precision ($\mu s$, ms, s).
 - **Reverse Chronological Sorting**: The logs are automatically sorted to show your latest achievements at the top of the list.
 - **Individual Deletion**: You can now remove specific entries from your history using the ⛔ button.
 - **Restore**: Replay past solutions directly on the board.
 - **Export**: Save your complete Solved History Logs to a `sudoku_solver_logs.txt` file.
 
-### 5. Customization
+### 6. Customization
 - **Sizes**: Switch between standard **9x9** and easier **6x6** grids.
 - **Dynamic Rules**: The "How to Play" section updates automatically based on the selected grid size to show rules for 3x3 or 2x3 regions.
 - **Themes**: Toggle between Light and Dark modes.

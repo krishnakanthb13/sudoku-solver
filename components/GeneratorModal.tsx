@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Sparkles, Grid3X3, Grid2X2 } from 'lucide-react';
+import { X, Sparkles } from 'lucide-react';
 import { SudokuSize, Difficulty } from '../types';
 
 interface GeneratorModalProps {
@@ -17,6 +17,16 @@ const GeneratorModal: React.FC<GeneratorModalProps> = ({
 }) => {
     const [size, setSize] = React.useState<SudokuSize>(defaultSize);
     const [difficulty, setDifficulty] = useState<Difficulty>('Medium');
+
+    // Scroll Lock (consistent with HistoryModal)
+    React.useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+        return () => { document.body.style.overflow = 'unset'; };
+    }, [isOpen]);
 
     React.useEffect(() => {
         if (isOpen) {

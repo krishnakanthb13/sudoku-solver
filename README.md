@@ -9,6 +9,7 @@ A lightning-fast, modern Sudoku solver and validator featuring real-time conflic
 ## 🚀 Features
 
 *   **Instant Solver**: Uses a backtracking algorithm to solve 9x9 and 6x6 puzzles in milliseconds.
+*   **Hint System**: Need a nudge? Get the correct value for one cell without revealing the entire solution.
 *   **Random Generator**: Build random valid boards with a single click.
 *   **Difficulty Modes**: Choose between **Easy, Medium, and Hard** modes for different challenge levels.
 *   **Grid Selection**: Quickly toggle between **6x6** and **9x9** formats via a pop-up selection menu.
