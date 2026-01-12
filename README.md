@@ -9,11 +9,15 @@ A lightning-fast, modern Sudoku solver and validator featuring real-time conflic
 ## 🚀 Features
 
 *   **Instant Solver**: Uses a backtracking algorithm to solve 9x9 and 6x6 puzzles in milliseconds.
+*   **Random Generator**: Build random valid boards with a single click.
+*   **Difficulty Modes**: Choose between **Easy, Medium, and Hard** modes for different challenge levels.
+*   **Grid Selection**: Quickly toggle between **6x6** and **9x9** formats via a pop-up selection menu.
 *   **Real-time Validation**: Detects conflicts (duplicate numbers in rows, cols, boxes) as you type.
 *   **Dark Mode**: Fully supported dark/light themes that persist across sessions.
 *   **History**: Automatically saves solved puzzles. Restore them anytime.
 *   **Log Export**: Save your solution history to a text file for record-keeping.
 *   **Responsive Design**: Works perfectly on desktop and mobile.
+
 
 ## 🛠️ Built With
 

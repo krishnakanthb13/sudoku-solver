@@ -2,59 +2,74 @@
 
 This document provides a technical overview of the codebase. It describes what each file does, making it easier for developers to understand and modify the project.
 
-## Directory Structure
+## 🎯 Project Strategy
+The primary goal of the recent updates was to transform the Sudoku Solver from a purely analytical tool into a playable game. By providing a random generator, the application becomes a self-contained Sudoku playground.
+
+**Key Objectives:**
+- **Enhance Playability**: Allow users to engage with new challenges instantly.
+- **Customizable Challenge**: Cater to both beginners and experts with Easy, Medium, and Hard modes.
+- **Flexible Grid Sizes**: Support 6x6 and 9x9 grids for varied session lengths.
+- **Professional Branding**: Custom favicon and refined UI for a polished product feel.
+
+## 📂 Directory Structure
 
 ### Root Directory
 - **index.html**
   - **Purpose**: The main entry point of the web application.
   - **Key Features**:
-    - Loads **Tailwind CSS** via a CDN (Content Delivery Network) for styling.
-    - Sets up global styles (fonts, input handling).
-    - Contains the `<div id="root">` where the React application attaches itself.
+    - Loads **Tailwind CSS** via a CDN for styling.
+    - Sets up global styles and includes the **favicon.svg** from the `public` folder.
+    - Contains the `<div id="root">` for the React application.
 
 - **index.tsx**
   - **Purpose**: The JavaScript entry point for React.
-  - **Functionality**: Finds the root element in `index.html` and renders the main `<App />` component into it.
+  - **Functionality**: Finds the root element in `index.html` and renders the main `<App />` component.
 
 - **App.tsx**
-  - **Purpose**: The heart of the application. It acts as the "Main Controller".
+  - **Purpose**: The heart of the application acting as the "Main Controller".
   - **Key Concepts**:
-    - **State Management**: Uses `useState` to keep track of the grid numbers, game status (solved/idle), and theme (dark/light).
-    - **Effect Hooks**: Uses `useEffect` to save history to local storage and update the theme automatically.
-    - **Layout**: detailed JSX structure that defines the visual look of the header, controls, and grid.
+    - **State Management**: Tracks the grid, game status, conflicts, and modal states (`isGeneratorOpen`, `isHistoryOpen`).
+    - **Integration**: Coordinates the logic between the Sudoku engine and UI components.
+    - **Handlers**: `handleGenerate` takes modal output, calls the generation engine, and updates the board.
 
 - **types.ts**
-  - **Purpose**: A dictionary for TypeScript.
-  - **Functionality**: Defines what a "Grid" looks like (array of numbers) and what a "SudokuSize" can be (6 or 9). This helps catch errors while coding.
+  - **Purpose**: Centralized type definitions.
+  - **Functionality**: Defines `Grid`, `SudokuSize`, `Difficulty`, and other interfaces used across the app.
 
 - **vite.config.ts**
-  - **Purpose**: Configuration for the build tool (Vite).
-  - **Functionality**: Tells Vite how to process React code and handle TypeScript files.
+  - **Purpose**: Configuration for the Vite build tool.
 
 - **run_app.bat**
-  - **Purpose**: A helper script for Windows users.
-  - **Functionality**: Automatically installs dependencies (if missing) and starts the development server with a single double-click.
+  - **Purpose**: Helper script to install dependencies and start the dev server for Windows users.
 
 ### /components
 *Reusable UI building blocks.*
 
 - **SudokuCell.tsx**
-  - **Purpose**: Represents a single square in the Sudoku grid.
-  - **Functionality**:
-    - Handles user input (typing numbers).
-    - Displays visual cues: Blue for user input, Black for initial numbers, Red for errors.
+  - **Purpose**: Represents a single square in the grid.
+  - **Functionality**: Handles input and displays visual cues (Blue for user input, Black for initial clues, Red for errors).
 
 - **HistoryModal.tsx**
-  - **Purpose**: A pop-up window showing past solved games.
-  - **Functionality**:
-    - Reads the history list passed from `App.tsx`.
-    - Allows the user to restore an old board or clear the history log.
+  - **Purpose**: Pop-up for viewing and restoring past solved games.
+
+- **GeneratorModal.tsx**
+  - **Purpose**: User selection pop-up for creating new puzzles.
+  - **Functionality**: 
+    - Manages local state for size and difficulty selection.
+    - Uses modern radio-style toggles for a premium UX.
 
 ### /services
-*Pure logic and algorithms (no UI).*
+*Pure logic and algorithms.*
 
 - **sudokuSolver.ts**
-  - **Purpose**: The brain of the application.
-  - **Key Algorithms**:
-    - **Backtracking**: A trial-and-error method. It tries a number, moves to the next cell. If it gets stuck, it "backtracks" (goes back) and tries a different number.
-    - **Validation**: Checks if a move is valid (unique in row, column, and 3x3 box).
+  - **Purpose**: The "brain" of the app.
+  - **Key Logic**:
+    - **Backtracking**: Used both for solving user puzzles and generating new ones.
+    - **`solveSudokuRandom`**: A variation of the solver that shuffles possible numbers (1-9) to ensure unique boards every time.
+    - **`generateSudoku`**: 
+        1. Generates a full valid board.
+        2. "Digs holes" by removing numbers based on difficulty (Easy: ~43 clues, Medium: ~35 clues, Hard: ~27 clues for 9x9).
+
+---
+*Last updated: January 2026*
+

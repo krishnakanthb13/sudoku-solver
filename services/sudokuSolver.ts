@@ -1,4 +1,4 @@
-import { Grid, SudokuSize, CellPosition } from '../types';
+import { Grid, SudokuSize, CellPosition, Difficulty } from '../types';
 
 /**
  * Creates an empty grid of the specified size.
@@ -156,10 +156,100 @@ export const solveSudoku = (inputBoard: Grid, size: SudokuSize): Grid | null => 
   // If the starting state breaks rules, `isValidMove` might return true for a number that conflicts with the invalid placement,
   // but strictly speaking, a solver starts from a valid partial state. 
   // We will assume UI prevents running solve on visibly invalid boards, but let's just run it.
-  
+
   if (solve()) {
     return board;
   } else {
     return null;
   }
 };
+
+/**
+ * Shuffles an array in place.
+ */
+const shuffle = <T>(array: T[]): T[] => {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+/**
+ * Solves the sudoku with randomized number selection to create varied boards.
+ */
+const solveSudokuRandom = (inputBoard: Grid, size: SudokuSize): Grid | null => {
+  const board = inputBoard.map(row => [...row]);
+
+  const findEmpty = (): [number, number] | null => {
+    for (let i = 0; i < size; i++) {
+      for (let j = 0; j < size; j++) {
+        if (board[i][j] === 0) return [i, j];
+      }
+    }
+    return null;
+  };
+
+  const solve = (): boolean => {
+    const emptyPos = findEmpty();
+    if (!emptyPos) return true;
+
+    const [row, col] = emptyPos;
+
+    // Randomize the order of numbers tried
+    const nums = Array.from({ length: size }, (_, i) => i + 1);
+    shuffle(nums);
+
+    for (const num of nums) {
+      if (isValidMove(board, row, col, num, size)) {
+        board[row][col] = num;
+        if (solve()) return true;
+        board[row][col] = 0;
+      }
+    }
+    return false;
+  };
+
+  if (solve()) return board;
+  return null;
+};
+
+/**
+ * Generates a random valid Sudoku board based on size and difficulty.
+ */
+export const generateSudoku = (size: SudokuSize, difficulty: Difficulty): Grid => {
+  const empty = createEmptyGrid(size);
+  const solved = solveSudokuRandom(empty, size);
+
+  if (!solved) return empty; // Fallback
+
+  const board = solved.map(r => [...r]);
+  const totalCells = size * size;
+  let cluesToKeep = 0;
+
+  if (size === 9) {
+    if (difficulty === 'Easy') cluesToKeep = 43;
+    else if (difficulty === 'Medium') cluesToKeep = 35;
+    else cluesToKeep = 27; // Hard
+  } else {
+    // 6x6 = 36 cells
+    if (difficulty === 'Easy') cluesToKeep = 24;
+    else if (difficulty === 'Medium') cluesToKeep = 18;
+    else cluesToKeep = 12;
+  }
+
+  const cellsToRemove = totalCells - cluesToKeep;
+  let removed = 0;
+
+  while (removed < cellsToRemove) {
+    const r = Math.floor(Math.random() * size);
+    const c = Math.floor(Math.random() * size);
+    if (board[r][c] !== 0) {
+      board[r][c] = 0;
+      removed++;
+    }
+  }
+
+  return board;
+};
+

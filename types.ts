@@ -11,3 +11,6 @@ export interface ValidationResult {
   isValid: boolean;
   conflictingCells: CellPosition[];
 }
+
+export type Difficulty = 'Easy' | 'Medium' | 'Hard';
+
