@@ -14,8 +14,8 @@ A lightning-fast, modern Sudoku solver and validator featuring real-time conflic
 *   **Grid Selection**: Quickly toggle between **6x6** and **9x9** formats via a pop-up selection menu.
 *   **Real-time Validation**: Detects conflicts (duplicate numbers in rows, cols, boxes) as you type.
 *   **Dark Mode**: Fully supported dark/light themes that persist across sessions.
-*   **History**: Automatically saves solved puzzles. Restore them anytime.
-*   **Log Export**: Save your solution history to a text file for record-keeping.
+*   **Solved History Logs**: Automatically saves solved puzzles with precisely formatted timing ($\mu s$, ms, s). Restore puzzles anytime or delete specific entries (⛔) from the history list.
+*   **Log Export**: Save your Solved History Logs to a text file for record-keeping.
 *   **Responsive Design**: Works perfectly on desktop and mobile.
 
 

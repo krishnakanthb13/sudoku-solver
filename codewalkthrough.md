@@ -28,7 +28,10 @@ The primary goal of the recent updates was to transform the Sudoku Solver from a
 - **App.tsx**
   - **Purpose**: The heart of the application acting as the "Main Controller".
   - **Key Concepts**:
-    - **State Management**: Tracks the grid, game status, conflicts, and modal states (`isGeneratorOpen`, `isHistoryOpen`).
+    - **State Management**: Tracks the grid, game status, conflicts, and the "Solved History Logs" list.
+    - **Dynamic Content**: Monitors the current grid size to update the "How to Play" instructions in real-time.
+    - **History Management**: Implements `handleHistoryEntryDelete` to manage individual solve records.
+    - **Reverse Chronological Order**: Ensures that the newest solves are always displayed at the top of the history modal.
     - **Integration**: Coordinates the logic between the Sudoku engine and UI components.
     - **Handlers**: `handleGenerate` takes modal output, calls the generation engine, and updates the board.
 

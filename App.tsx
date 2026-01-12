@@ -4,7 +4,7 @@ import { createEmptyGrid, solveSudoku, validateBoard, generateSudoku } from './s
 import SudokuCell from './components/SudokuCell';
 import HistoryModal, { HistoryItem } from './components/HistoryModal';
 import GeneratorModal from './components/GeneratorModal';
-import { Play, Trash2, CheckCircle2, AlertCircle, Moon, Sun, Timer, Grid3X3, History, Sparkles } from 'lucide-react';
+import { Play, Trash2, CheckCircle, AlertCircle, Moon, Sun, Timer, Grid3X3, History, Sparkles, RotateCcw, HelpCircle, Info } from 'lucide-react';
 
 const HISTORY_STORAGE_KEY = 'sudoku-solver-history-v2'; // Bumped version for new schema
 
@@ -20,6 +20,7 @@ const App: React.FC = () => {
   const [status, setStatus] = useState<'idle' | 'solved' | 'unsolvable'>('idle');
   const [conflicts, setConflicts] = useState<Set<string>>(new Set());
   const [solveDuration, setSolveDuration] = useState<number | null>(null);
+  const [isBoardSolvable, setIsBoardSolvable] = useState(true);
 
   // History State
   const [history, setHistory] = useState<HistoryItem[]>([]);
@@ -70,6 +71,15 @@ const App: React.FC = () => {
     setConflicts(conflictSet);
   }, [grid, size]);
 
+  // Dynamic Solvability Check
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const solution = solveSudoku(grid, size);
+      setIsBoardSolvable(!!solution);
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [grid, size]);
+
   const addToHistory = (duration: number, solvedGrid: Grid) => {
     const newItem: HistoryItem = {
       id: crypto.randomUUID(),
@@ -78,7 +88,7 @@ const App: React.FC = () => {
       size: size,
       gridSnapshot: solvedGrid.map(row => [...row]) // Deep copy for snapshot
     };
-    const updatedHistory = [...history, newItem];
+    const updatedHistory = [newItem, ...history].slice(0, 50);
     setHistory(updatedHistory);
     localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(updatedHistory));
   };
@@ -86,6 +96,15 @@ const App: React.FC = () => {
   const handleClearHistory = () => {
     setHistory([]);
     localStorage.removeItem(HISTORY_STORAGE_KEY);
+  };
+
+  const handleHistoryEntryDelete = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (window.confirm("Delete this entry?")) {
+      const updatedHistory = history.filter(item => item.id !== id);
+      setHistory(updatedHistory);
+      localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(updatedHistory));
+    }
   };
 
   const handleRestoreHistory = (item: HistoryItem) => {
@@ -188,23 +207,48 @@ const App: React.FC = () => {
     }
   }, [grid, size, conflicts, history]);
 
+  const handleHint = () => {
+    if (conflicts.size > 0) {
+      alert("Please fix conflicts before getting a hint.");
+      return;
+    }
+    const solution = solveSudoku(grid, size);
+    if (!solution) {
+      alert("This puzzle seems unsolvable.");
+      return;
+    }
+
+    // Find first empty cell and fill it from solution
+    for (let r = 0; r < size; r++) {
+      for (let c = 0; c < size; c++) {
+        if (grid[r][c] === 0) {
+          handleCellChange(r, c, solution[r][c].toString());
+          return;
+        }
+      }
+    }
+    alert("Board is already complete!");
+  };
+
   const isCellInitial = (row: number, col: number) => {
     return initialCells.has(`${row}-${col}`);
   };
 
   const formatTime = (ms: number) => {
-    if (ms < 1) return `${(ms * 1000).toFixed(0)} µs`;
-    return `${ms.toFixed(2)} ms`;
+    if (ms < 0.001) return "< 1 μs";
+    if (ms < 1) return `${Math.round(ms * 1000)} μs`;
+    if (ms < 1000) return `${ms.toFixed(2)} ms`;
+    return `${(ms / 1000).toFixed(3)} s`;
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center py-10 px-4 transition-colors duration-300">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans flex flex-col items-center py-8 px-4 transition-colors duration-200 relative">
 
-      {/* Top Bar */}
-      <div className="absolute top-4 right-4 flex items-center gap-2">
+      {/* Top Bar - Keeping styles consistent */}
+      <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
         <button
           onClick={() => setIsHistoryOpen(true)}
-          className="p-2 rounded-full bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 shadow-md hover:scale-105 transition-transform"
+          className="p-2 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors"
           aria-label="View History"
           title="Execution History"
         >
@@ -212,7 +256,7 @@ const App: React.FC = () => {
         </button>
         <button
           onClick={() => setDarkMode(!darkMode)}
-          className="p-2 rounded-full bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 shadow-md hover:scale-105 transition-transform"
+          className="p-2 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors"
           aria-label="Toggle Theme"
         >
           {darkMode ? <Sun size={20} /> : <Moon size={20} />}
@@ -225,6 +269,7 @@ const App: React.FC = () => {
         history={history}
         onClearHistory={handleClearHistory}
         onRestoreHistory={handleRestoreHistory}
+        onDeleteEntry={handleHistoryEntryDelete}
       />
 
       <GeneratorModal
@@ -234,149 +279,184 @@ const App: React.FC = () => {
       />
 
       {/* Header */}
-      <header className="mb-8 text-center space-y-3">
-        <h1 className="text-4xl md:text-5xl font-extrabold text-slate-800 dark:text-white tracking-tight flex items-center justify-center gap-3">
-          <Grid3X3 className="text-blue-600 dark:text-blue-500" size={40} />
-          Sudoku Master
-        </h1>
-        <p className="text-slate-500 dark:text-slate-400 max-w-lg mx-auto text-sm md:text-base leading-relaxed">
-          The ultimate tool for solving and validating Sudoku puzzles. Supports 6x6 and 9x9 grids with real-time conflict detection and an lightning-fast offline solving engine.
-        </p>
+      <header className="relative backdrop-blur-md bg-white/30 dark:bg-slate-900/30 border border-white/20 dark:border-white/10 shadow-xl rounded-2xl p-6 mb-6 text-center max-w-2xl w-full mx-auto">
+        <div className="flex flex-col items-center">
+          <div className="flex items-center gap-3 mb-3">
+            <Grid3X3 className="text-blue-600 dark:text-blue-500 w-10 h-10" />
+            <h1 className="text-4xl font-bold text-slate-800 dark:text-slate-100">
+              Sudoku Master
+            </h1>
+          </div>
+          <p className="text-slate-600 dark:text-slate-400 text-lg">
+            The ultimate tool for solving and validating Sudoku puzzles.
+          </p>
+        </div>
       </header>
 
-      {/* Controls Container */}
-      <div className="w-full max-w-2xl flex flex-col gap-6 mb-8">
+      <div className="flex flex-col lg:flex-row gap-4 w-full max-w-6xl justify-center items-start">
 
-        {/* Main Actions Card */}
-        <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700/50 flex flex-col sm:flex-row gap-5 items-center justify-between">
+        {/* Left Column: Board */}
+        <div className="flex-1 w-full flex flex-col items-center max-w-[500px] mx-auto lg:mx-0">
+          {status === 'solved' && solveDuration !== null && (
+            <div className="w-full mb-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 px-4 py-2 rounded-lg flex items-center justify-center gap-2 animate-in fade-in text-sm">
+              <CheckCircle className="w-4 h-4 shrink-0" />
+              <p>
+                <span className="font-semibold">Solved</span> in {formatTime(solveDuration)}
+              </p>
+            </div>
+          )}
+          <div
+            key={`grid-${size}-${status}`}
+            className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden"
+            style={{ width: 'fit-content' }}
+          >
+            <div
+              className="grid border-4 border-slate-800 dark:border-slate-700 bg-slate-300 dark:bg-slate-700"
+              style={{
+                gridTemplateColumns: `repeat(${size}, minmax(0, 1fr))`,
+                width: size === 9 ? 'min(90vw, 500px)' : 'min(90vw, 330px)',
+                height: size === 9 ? 'min(90vw, 500px)' : 'min(90vw, 330px)',
+                gap: '2px'
+              }}
+            >
+              {grid.map((row, rowIndex) => (
+                row.map((cellValue, colIndex) => (
+                  <div key={`${rowIndex}-${colIndex}`} className="relative bg-white dark:bg-slate-900 h-full w-full">
+                    <SudokuCell
+                      row={rowIndex}
+                      col={colIndex}
+                      value={cellValue}
+                      size={size}
+                      onChange={handleCellChange}
+                      isInitial={isCellInitial(rowIndex, colIndex)}
+                      isError={conflicts.has(`${rowIndex}-${colIndex}`)}
+                      disabled={status === 'solved' && !isCellInitial(rowIndex, colIndex)}
+                    />
+                  </div>
+                ))
+              ))}
+            </div>
+          </div>
+        </div>
 
-          {/* Size Selector */}
-          <div className="flex items-center gap-3">
-            <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Size</span>
-            <div className="flex bg-slate-100 dark:bg-slate-900/50 p-1.5 rounded-xl border border-slate-200 dark:border-slate-700">
+        {/* Right Column: Controls */}
+        <div className="w-full max-w-[500px] lg:max-w-none lg:w-96 flex flex-col gap-4 mx-auto lg:mx-0">
+
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 transition-colors duration-200">
+            <h2 className="text-xl font-semibold mb-4 text-slate-800 dark:text-slate-200 flex items-center gap-2">
+              <Play className="w-5 h-5" /> Game Controls
+            </h2>
+
+
+
+            <div className="grid grid-cols-2 gap-3">
               <button
-                onClick={() => handleSizeChange(6)}
-                className={`px-4 py-1.5 text-sm font-semibold rounded-lg transition-all ${size === 6 ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
+                onClick={handleSolve}
+                disabled={status === 'solved'}
+                className={`col-span-2 flex items-center justify-center gap-2 font-medium py-3 px-4 rounded-lg transition-all shadow-sm
+                  ${status === 'solved'
+                    ? 'bg-emerald-600 text-white cursor-default'
+                    : 'bg-indigo-600 hover:bg-indigo-700 text-white active:scale-[0.98]'
+                  }`}
               >
-                6x6
+                {status === 'solved' ? <><CheckCircle className="w-5 h-5" /> Solved</> : <><Sparkles className="w-5 h-5" /> Auto Solve</>}
               </button>
+
               <button
-                onClick={() => handleSizeChange(9)}
-                className={`px-4 py-1.5 text-sm font-semibold rounded-lg transition-all ${size === 9 ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
+                onClick={() => setIsGeneratorOpen(true)}
+                className="flex items-center justify-center gap-2 bg-purple-100 hover:bg-purple-200 dark:bg-purple-900/40 dark:hover:bg-purple-900/60 text-purple-800 dark:text-purple-200 py-3 px-4 rounded-lg font-medium transition-colors border border-purple-200 dark:border-purple-800/50 active:scale-[0.98]"
               >
-                9x9
+                <Sparkles className="w-5 h-5" /> New
               </button>
+
+              <button
+                onClick={handleClearBoard}
+                className="flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 py-3 px-4 rounded-lg font-medium transition-colors border border-slate-200 dark:border-slate-700 active:scale-[0.98]"
+              >
+                <RotateCcw className="w-5 h-5" /> Reset
+              </button>
+            </div>
+
+            {/* Hint Button (Standardized placement) */}
+            <button
+              onClick={handleHint}
+              disabled={status === 'solved'}
+              className="w-full mt-4 flex items-center justify-center gap-2 bg-amber-100 hover:bg-amber-200 dark:bg-amber-900/40 dark:hover:bg-amber-900/60 text-amber-800 dark:text-amber-200 py-3 px-4 rounded-lg font-medium transition-colors border border-amber-200 dark:border-amber-800/50 shadow-sm active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
+            >
+              <HelpCircle className="w-5 h-5" /> Hint
+            </button>
+
+            {/* Status Display moved inside card */}
+            <div className="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-center animate-in fade-in">
+              {conflicts.size > 0 ? (
+                <span className="text-red-600 dark:text-red-400 text-sm font-medium flex items-center justify-center gap-2 animate-pulse">
+                  <Info className="w-4 h-4" /> {conflicts.size} conflicts detected!
+                </span>
+              ) : !isBoardSolvable ? (
+                <span className="text-orange-600 dark:text-orange-400 text-sm font-medium flex items-center justify-center gap-2">
+                  <Info className="w-4 h-4" /> Board Layout is Unsolvable
+                </span>
+              ) : status === 'solved' ? (
+                <span className="text-emerald-600 dark:text-emerald-400 text-sm font-medium flex items-center justify-center gap-2">
+                  <CheckCircle className="w-4 h-4" /> Solved
+                </span>
+              ) : (
+                <span className="text-emerald-600 dark:text-emerald-400 text-sm font-medium flex items-center justify-center gap-2">
+                  <CheckCircle className="w-4 h-4" /> Board is valid
+                </span>
+              )}
+            </div>
+
+            {/* Size Selector (Moved below Status Display) */}
+            <div className="flex items-center justify-between mt-3 bg-slate-100 dark:bg-slate-800/50 p-2 rounded-lg border border-slate-200 dark:border-slate-700">
+              <span className="text-sm font-semibold text-slate-600 dark:text-slate-400 pl-2">Grid Size</span>
+              <div className="flex gap-1">
+                <button
+                  onClick={() => handleSizeChange(6)}
+                  className={`px-3 py-1 text-sm font-medium rounded-md transition-all ${size === 6 ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
+                >
+                  6x6
+                </button>
+                <button
+                  onClick={() => handleSizeChange(9)}
+                  className={`px-3 py-1 text-sm font-medium rounded-md transition-all ${size === 9 ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
+                >
+                  9x9
+                </button>
+              </div>
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex gap-2 w-full sm:w-auto">
-            <button
-              type="button"
-              onClick={() => setIsGeneratorOpen(true)}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-900/50 font-semibold rounded-xl transition-colors"
-              title="Generate New Puzzle"
-            >
-              <Sparkles size={18} />
-              <span>New</span>
-            </button>
-            {/* Clear Board - Always available */}
-            <button
-              type="button"
-              onClick={handleClearBoard}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-900/30 dark:hover:text-red-400 text-slate-700 dark:text-slate-200 font-semibold rounded-xl transition-colors"
-              title="Clear Entire Board"
-            >
-              <Trash2 size={18} />
-              <span>Clear Board</span>
-            </button>
-
-            {/* Solve Button */}
-            <button
-              type="button"
-              onClick={handleSolve}
-              disabled={status === 'solved'}
-              className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-8 py-2.5 font-bold rounded-xl transition-all shadow-md text-white min-w-[140px]
-                      ${status === 'solved'
-                  ? 'bg-green-500 dark:bg-green-600 cursor-default ring-4 ring-green-500/20'
-                  : 'bg-blue-600 dark:bg-blue-600 hover:bg-blue-700 hover:shadow-lg active:scale-95'}
-                  `}
-            >
-              {status === 'solved' ? (
-                <><CheckCircle2 size={18} /> Solved</>
-              ) : (
-                <><Play size={18} fill="currentColor" /> Solve</>
-              )}
-            </button>
+          <div className="bg-slate-100 dark:bg-slate-800/50 p-4 rounded-xl text-sm text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 text-center">
+            <p>Enter numbers to validate. Clear board to start over.</p>
           </div>
-        </div>
 
-        {/* Stats / Info Row */}
-        {(status !== 'idle' || conflicts.size > 0) && (
-          <div className="flex justify-center animate-in fade-in slide-in-from-top-4 duration-300">
-            {status === 'solved' && solveDuration !== null && (
-              <div className="bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 border border-green-200 dark:border-green-800">
-                <Timer size={16} />
-                Solved in <span className="font-bold">{formatTime(solveDuration)}</span>
-              </div>
-            )}
-
-            {status === 'unsolvable' && (
-              <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 border border-red-200 dark:border-red-800">
-                <AlertCircle size={16} />
-                Unsolvable Configuration
-              </div>
-            )}
-
-            {status === 'idle' && conflicts.size > 0 && (
-              <div className="bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 border border-orange-200 dark:border-orange-800">
-                <AlertCircle size={16} />
-                {conflicts.size} Conflicts Detected
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Grid Container */}
-      <div
-        key={`grid-${size}-${status}`}
-        className="bg-white dark:bg-slate-900 p-4 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden"
-        style={{ width: 'fit-content' }}
-      >
-        <div
-          className="grid border-4 border-slate-800 dark:border-slate-700 bg-slate-300 dark:bg-slate-700"
-          style={{
-            gridTemplateColumns: `repeat(${size}, minmax(0, 1fr))`,
-            width: size === 9 ? 'min(90vw, 450px)' : 'min(90vw, 300px)',
-            height: size === 9 ? 'min(90vw, 450px)' : 'min(90vw, 300px)',
-            gap: '2px' // Thicker grid lines
-          }}
-        >
-          {grid.map((row, rowIndex) => (
-            row.map((cellValue, colIndex) => (
-              <div key={`${rowIndex}-${colIndex}`} className="relative bg-white dark:bg-slate-900 h-full w-full">
-                <SudokuCell
-                  row={rowIndex}
-                  col={colIndex}
-                  value={cellValue}
-                  size={size}
-                  onChange={handleCellChange}
-                  isInitial={isCellInitial(rowIndex, colIndex)}
-                  isError={conflicts.has(`${rowIndex}-${colIndex}`)}
-                  disabled={status === 'solved' && !isCellInitial(rowIndex, colIndex)}
-                />
-              </div>
-            ))
-          ))}
         </div>
       </div>
 
-      <div className="mt-12 text-center">
-        <p className="text-xs text-slate-400 dark:text-slate-400/80">
-          Enter numbers to validate. Clear board to start over.
-        </p>
-      </div>
+      <footer className="mt-8 mb-6 text-center space-y-6 max-w-2xl mx-auto px-4">
+        <div className="bg-white/50 dark:bg-slate-900/50 p-6 rounded-xl border border-slate-200/50 dark:border-slate-700/50 backdrop-blur-sm">
+          <h3 className="font-bold text-slate-800 dark:text-slate-200 mb-2 flex items-center justify-center gap-2">
+            How to Play
+          </h3>
+          <ul className="text-slate-600 dark:text-slate-400 text-sm space-y-1">
+            {size === 9 ? (
+              <>
+                <li>Fill every row, column, and 3x3 region with numbers 1 to 9.</li>
+                <li>No number can repeat within the same row, column, or region.</li>
+              </>
+            ) : (
+              <>
+                <li>Fill every row, column, and 2x3 region with numbers 1 to 6.</li>
+                <li>No number can repeat within the same row, column, or region.</li>
+              </>
+            )}
+          </ul>
+        </div>
+        <div className="text-slate-400 dark:text-slate-500 text-xs font-medium animate-pulse">
+          Built with 🧠 and ☕ by Krishna Kanth B
+        </div>
+      </footer>
 
     </div>
   );

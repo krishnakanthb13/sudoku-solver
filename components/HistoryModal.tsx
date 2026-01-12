@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Trash2, Calendar, Clock, Timer, Eye, Save } from 'lucide-react';
+import { X, Trash2, Calendar, Clock, Timer, Eye, Download, History, CircleX } from 'lucide-react';
 import { SudokuSize, Grid } from '../types';
 
 export interface HistoryItem {
@@ -16,6 +16,7 @@ interface HistoryModalProps {
   history: HistoryItem[];
   onClearHistory: () => void;
   onRestoreHistory: (item: HistoryItem) => void;
+  onDeleteEntry: (id: string, e: React.MouseEvent) => void;
 }
 
 const HistoryModal: React.FC<HistoryModalProps> = ({
@@ -23,20 +24,46 @@ const HistoryModal: React.FC<HistoryModalProps> = ({
   onClose,
   history,
   onClearHistory,
-  onRestoreHistory
+  onRestoreHistory,
+  onDeleteEntry
 }) => {
+  // Scroll Lock
+  React.useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => { document.body.style.overflow = 'unset'; };
+  }, [isOpen]);
+
+  const formatDuration = (ms: number) => {
+    if (ms < 0.001) return "< 1 μs";
+    if (ms < 1) return `${Math.round(ms * 1000)} μs`;
+    if (ms < 1000) return `${ms.toFixed(2)} ms`;
+    return `${(ms / 1000).toFixed(3)} s`;
+  };
+
+  const formatTime = (ts: number) => {
+    return new Date(ts).toLocaleString('en-US', {
+      month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
+    });
+  };
+
   if (!isOpen) return null;
 
   const handleSaveLogs = async () => {
     let logContent = "Sudoku Solver - Execution History Logs\n";
     logContent += "=======================================\n\n";
 
-    history.slice().reverse().forEach((item, index) => {
-      const date = new Date(item.timestamp);
-      logContent += `Entry #${history.length - index}\n`;
-      logContent += `Time: ${date.toLocaleString()}\n`;
+    // Sort history by timestamp descending (New -> Old)
+    const sortedHistory = [...history].sort((a, b) => b.timestamp - a.timestamp);
+
+    sortedHistory.slice(0, 100).forEach((item, index) => {
+      logContent += `Entry #${index + 1}\n`;
+      logContent += `Time: ${new Date(item.timestamp).toLocaleString()}\n`;
       logContent += `Grid Size: ${item.size}x${item.size}\n`;
-      logContent += `Solve Duration: ${item.duration < 1 ? (item.duration * 1000).toFixed(0) + ' µs' : item.duration.toFixed(2) + ' ms'}\n`;
+      logContent += `Solve Duration: ${formatDuration(item.duration)}\n`;
 
       logContent += `Board:\n`;
       item.gridSnapshot.forEach(row => {
@@ -48,12 +75,9 @@ const HistoryModal: React.FC<HistoryModalProps> = ({
 
     const blob = new Blob([logContent], { type: 'text/plain' });
 
-    // Use File System Access API if available
     try {
-      // @ts-ignore - window.showSaveFilePicker is not yet in all TS lib definitions
-      if (window.showSaveFilePicker) {
-        // @ts-ignore
-        const handle = await window.showSaveFilePicker({
+      if ((window as any).showSaveFilePicker) {
+        const handle = await (window as any).showSaveFilePicker({
           suggestedName: 'sudoku_solver_logs.txt',
           types: [{
             description: 'Text Files',
@@ -66,15 +90,13 @@ const HistoryModal: React.FC<HistoryModalProps> = ({
         return;
       }
     } catch (err: any) {
-      // User cancelled or other error, fallback to default download if not a cancellation
       if (err.name !== 'AbortError') {
         console.error('File Save Error:', err);
       } else {
-        return; // User cancelled, do nothing
+        return;
       }
     }
 
-    // Fallback for browsers without File System Access API
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -93,88 +115,104 @@ const HistoryModal: React.FC<HistoryModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200 overscroll-y-contain"
+      onClick={onClose}
+    >
       <div
-        className="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col max-h-[80vh] animate-in zoom-in-95 duration-200"
+        className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col border border-slate-200 dark:border-slate-700 animate-in zoom-in-95 duration-200"
         role="dialog"
         aria-modal="true"
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-slate-100 dark:border-slate-800">
-          <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-            <Clock className="text-blue-600 dark:text-blue-500" />
-            Execution History
+        <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center sticky top-0 bg-white dark:bg-slate-900 rounded-t-xl z-10">
+          <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+            <History className="w-5 h-5 text-blue-500" /> Solved History Logs
           </h2>
-          <button
-            onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
-          >
-            <X size={20} />
-          </button>
+          <div className="flex gap-2">
+            {history.length > 0 && (
+              <>
+                <button
+                  onClick={handleSaveLogs}
+                  className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                  title="Save Logs"
+                >
+                  <Download className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={handleClearClick}
+                  className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                  title="Clear History"
+                >
+                  <Trash2 className="w-5 h-5" />
+                </button>
+              </>
+            )}
+            <button
+              onClick={onClose}
+              className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* List */}
-        <div className="flex-1 overflow-y-auto p-2 space-y-2">
+        <div className="overflow-y-auto p-4 flex-1 scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-700">
           {history.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-slate-400 dark:text-slate-500">
-              <Calendar size={48} className="mb-3 opacity-20" />
-              <p>No puzzles solved yet.</p>
+              <History size={48} className="mb-3 opacity-20" />
+              <p className="text-sm">No puzzles solved yet.</p>
             </div>
           ) : (
-            history.slice().reverse().map((item) => (
-              <button
-                key={item.id}
-                onClick={() => onRestoreHistory(item)}
-                className="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 flex items-center justify-between group hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-md transition-all text-left"
-                title="Click to view this board"
-              >
-                <div className="flex flex-col gap-1">
-                  <div className="flex items-center gap-2 text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider">
-                    <span className="bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 rounded text-[10px]">
-                      {item.size}x{item.size}
-                    </span>
-                    <span>Solved</span>
+            <div className="space-y-3">
+              {/* Sort history by timestamp descending (New -> Old) before mapping */}
+              {[...history].sort((a, b) => b.timestamp - a.timestamp).slice(0, 100).map((item) => (
+                <div
+                  key={item.id}
+                  className="group flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-md transition-all content-visibility-auto contain-intrinsic-size-[88px]"
+                >
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700">
+                        {item.size}x{item.size}
+                      </span>
+                      <span className="text-xs text-slate-400 flex items-center gap-1">
+                        <Clock className="w-3 h-3" /> {formatTime(item.timestamp)}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-sm text-slate-600 dark:text-slate-300 font-medium">Solved in:</span>
+                      <span className="text-sm font-mono font-bold text-blue-600 dark:text-blue-400">
+                        {formatDuration(item.duration)}
+                      </span>
+                    </div>
                   </div>
-                  <div className="text-sm text-slate-600 dark:text-slate-300">
-                    {new Date(item.timestamp).toLocaleDateString()} <span className="text-slate-400 px-1">•</span> {new Date(item.timestamp).toLocaleTimeString()}
-                  </div>
-                </div>
 
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-mono font-medium bg-green-50 dark:bg-green-900/10 px-3 py-1.5 rounded-lg border border-green-100 dark:border-green-900/20">
-                    <Timer size={14} />
-                    {item.duration < 1
-                      ? `${(item.duration * 1000).toFixed(0)}µs`
-                      : `${item.duration.toFixed(2)}ms`}
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => onRestoreHistory(item)}
+                      className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg group-hover:bg-blue-50 dark:group-hover:bg-blue-900/30 group-hover:text-blue-600 dark:group-hover:text-blue-400 group-hover:border-blue-200 dark:group-hover:border-blue-700 transition-colors"
+                    >
+                      <Eye className="w-4 h-4" /> View
+                    </button>
+                    <button
+                      onClick={(e) => onDeleteEntry(item.id, e)}
+                      className="p-1.5 text-slate-400 hover:text-red-500 transition-colors"
+                      title="Delete Entry"
+                    >
+                      <CircleX className="w-4 h-4" />
+                    </button>
                   </div>
-                  <Eye size={18} className="text-slate-300 group-hover:text-blue-500 transition-colors" />
                 </div>
-              </button>
-            ))
+              ))}
+            </div>
           )}
         </div>
-
-        {/* Footer */}
-        {history.length > 0 && (
-          <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 rounded-b-2xl flex gap-3">
-            <button
-              onClick={handleSaveLogs}
-              className="flex-1 py-2.5 flex items-center justify-center gap-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl transition-colors text-sm font-semibold"
-            >
-              <Save size={16} />
-              Save Logs
-            </button>
-            <button
-              onClick={handleClearClick}
-              className="flex-1 py-2.5 flex items-center justify-center gap-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors text-sm font-semibold"
-            >
-              <Trash2 size={16} />
-              Clear History Log
-            </button>
-          </div>
-        )}
       </div>
     </div>
+
   );
 };
 

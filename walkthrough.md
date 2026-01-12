@@ -24,14 +24,17 @@ Sudoku Master is a modern, web-based tool designed to help you solve, validate, 
 - **Size Selection**: Choose between **6x6** or **9x9** using the radio-style buttons.
 - **Instant Generation**: The app builds a valid, solvable board instantly based on your choices.
 
-### 4. Game History
-- **Tracking**: Every time you solve a puzzle, it's saved to your local history.
-- **Restore**: You can open the History menu (clock icon) to view past solutions and restore them to the board for review.
-- **Export**: Save your entire history of solved puzzles to a `sudoku_solver_logs.txt` file for offline reference.
+### 4. Solved History Logs
+- **Tracking**: Every time you solve a puzzle, it's saved to your local history with professional precision ($\mu s$, ms, s).
+- **Reverse Chronological Sorting**: The logs are automatically sorted to show your latest achievements at the top of the list.
+- **Individual Deletion**: You can now remove specific entries from your history using the ⛔ button.
+- **Restore**: Replay past solutions directly on the board.
+- **Export**: Save your complete Solved History Logs to a `sudoku_solver_logs.txt` file.
 
 ### 5. Customization
 - **Sizes**: Switch between standard **9x9** and easier **6x6** grids.
-- **Themes**: Toggle between Light and Dark modes for comfortable viewing at any time of day.
+- **Dynamic Rules**: The "How to Play" section updates automatically based on the selected grid size to show rules for 3x3 or 2x3 regions.
+- **Themes**: Toggle between Light and Dark modes.
 - **Brand**: Look for our custom Sudoku Master favicon in your browser tab!
 
 ## Technical Details

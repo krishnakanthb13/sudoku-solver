@@ -14,7 +14,7 @@ const GeneratorModal: React.FC<GeneratorModalProps> = ({
     onGenerate
 }) => {
     const [size, setSize] = useState<SudokuSize>(9);
-    const [difficulty, setDifficulty] = useState<Difficulty>('Easy');
+    const [difficulty, setDifficulty] = useState<Difficulty>('Medium');
 
     if (!isOpen) return null;
 
@@ -24,8 +24,14 @@ const GeneratorModal: React.FC<GeneratorModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="w-full max-w-sm bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col animate-in zoom-in-95 duration-200">
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200"
+            onClick={onClose}
+        >
+            <div
+                className="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col animate-in zoom-in-95 duration-200"
+                onClick={(e) => e.stopPropagation()}
+            >
 
                 {/* Header */}
                 <div className="flex items-center justify-between p-5 border-b border-slate-100 dark:border-slate-800">
@@ -88,15 +94,23 @@ const GeneratorModal: React.FC<GeneratorModalProps> = ({
                                 <button
                                     key={level}
                                     onClick={() => setDifficulty(level)}
-                                    className={`py-2 px-1 rounded-lg text-sm font-bold transition-all ${difficulty === level
-                                            ? 'bg-slate-800 dark:bg-slate-100 text-white dark:text-slate-900 shadow-lg scale-105'
-                                            : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
-                                        }`}
+                                    className={`
+                                        py-2 px-3 rounded-lg text-sm font-medium transition-all border
+                                        ${difficulty === level
+                                            ? 'bg-fuchsia-100 dark:bg-fuchsia-900/30 text-fuchsia-700 dark:text-fuchsia-300 border-fuchsia-500 dark:border-fuchsia-500 ring-1 ring-fuchsia-500'
+                                            : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
+                                        }
+                                    `}
                                 >
                                     {level}
                                 </button>
                             ))}
                         </div>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 text-center font-medium pt-2 min-h-[1.5em]">
+                            {difficulty === 'Easy' ? 'Abundant clues for a quick solve.' :
+                                difficulty === 'Medium' ? 'Fewer starting numbers, more logic required.' :
+                                    'Maximum empty cells for Sudoku pros.'}
+                        </p>
                     </div>
                 </div>
 
