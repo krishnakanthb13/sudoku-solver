@@ -1,6 +1,6 @@
-# Code Walkthrough
+# Code Documentation
 
-This document provides a technical overview of the codebase. It describes what each file does, making it easier for developers to understand and modify the project.
+This document provides a technical overview of the **Sudoku Solver** architecture, core methods, and data flow.
 
 ## 🎯 Project Strategy
 The primary goal of the recent updates was to transform the Sudoku Solver from a purely analytical tool into a playable game. By providing a random generator, the application becomes a self-contained Sudoku playground.
@@ -72,10 +72,38 @@ The primary goal of the recent updates was to transform the Sudoku Solver from a
   - **Key Logic**:
     - **Backtracking**: Used both for solving user puzzles and generating new ones.
     - **`solveSudokuRandom`**: A variation of the solver that shuffles possible numbers (1-9) to ensure unique boards every time.
-    - **`generateSudoku`**: 
         1. Generates a full valid board.
         2. "Digs holes" by removing numbers based on difficulty (Easy: ~43 clues, Medium: ~35 clues, Hard: ~27 clues for 9x9).
 
 ---
-*Last updated: January 2026*
 
+## 🏗️ Architecture Overview
+The application follows a standard **React Component Architecture** combined with a stateless **Service Layer** for mathematical logic.
+
+### Data Flow
+1. **User Interaction**: User types a number into `SudokuCell`.
+2. **State Transition**: `App.tsx` updates the `grid` state.
+3. **Validation**: `App.tsx` calls validation logic to check for conflicts ($row, col, box$).
+4. **Solver Engine**: When "Solve" is clicked, the `grid` is passed to `sudokuSolver.ts` which returns a completed grid or null.
+5. **Persistence**: Solve history is saved to `localStorage` and synchronized with the `records` state.
+
+## 🛠️ Core Methods
+| Method | Description | Location |
+| :--- | :--- | :--- |
+| `isValid` | Checks if a number can be placed in a cell (Row/Col/Box check). | `sudokuSolver.ts` |
+| `solveSudoku` | Main backtracking engine for solving puzzles. | `sudokuSolver.ts` |
+| `generateSudoku`| Creates a new puzzle by solving a random board and removing cells. | `sudokuSolver.ts` |
+| `handleHistoryEntryDelete` | Manages the deletion of solve logs from state and storage. | `App.tsx` |
+
+## 📦 Dependencies
+- **React 18**: UI Library.
+- **TypeScript**: Static typing for robustness.
+- **Lucide React**: Iconography.
+- **LocalStorage API**: For persistent history and theme settings.
+
+---
+[Return to Design Philosophy](./DESIGN_PHILOSOPHY.md)
+
+
+---
+*Last updated: January 2026*

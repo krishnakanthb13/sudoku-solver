@@ -285,7 +285,7 @@ const App: React.FC = () => {
           <div className="flex items-center gap-3 mb-3">
             <Grid3X3 className="text-blue-600 dark:text-blue-500 w-10 h-10" />
             <h1 className="text-4xl font-bold text-slate-800 dark:text-slate-100">
-              Sudoku Master
+              Sudoku Solver
             </h1>
           </div>
           <p className="text-slate-600 dark:text-slate-400 text-lg">

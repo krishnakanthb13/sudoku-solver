@@ -1,6 +1,6 @@
 @echo off
 setlocal
-echo Starting Sudoku Master...
+echo Starting Sudoku Solver...
 echo.
 
 :: Check if node_modules exists

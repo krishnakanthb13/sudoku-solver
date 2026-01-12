@@ -1,6 +1,7 @@
 # Logs
 logs
 *.log
+sudoku_solver_logs.txt
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

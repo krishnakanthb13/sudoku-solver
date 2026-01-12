@@ -4,6 +4,8 @@
 
 # Sudoku Solver
 
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
+
 A lightning-fast, modern Sudoku solver and validator featuring real-time conflict detection and an offline backtracking engine.
 
 ## 🚀 Features
@@ -38,7 +40,7 @@ A lightning-fast, modern Sudoku solver and validator featuring real-time conflic
 
 1.  **Clone the repository**
     ```bash
-    git clone https://github.com/yourusername/sudoku-solver.git
+    git clone https://github.com/krishnakanthb13/sudoku-solver.git
     cd sudoku-solver
     ```
 
@@ -59,8 +61,9 @@ A lightning-fast, modern Sudoku solver and validator featuring real-time conflic
 
 For a detailed guide on how to use the app and an explanation of the codebase, please refer to:
 
-*   **[User Guide](walkthrough.md)**: How to use the features.
-*   **[Code Walkthrough](codewalkthrough.md)**: Technical explanation of the files and logic.
+*   **[Design Philosophy](DESIGN_PHILOSOPHY.md)**: Problem being solved and design principles.
+*   **[Code Documentation](CODE_DOCUMENTATION.md)**: Technical explanation of the files and logic.
+*   **[Contributing Guide](CONTRIBUTING.md)**: How to help with the project.
 
 ## 📄 License
 

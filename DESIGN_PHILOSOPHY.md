@@ -1,9 +1,33 @@
-# Application Walkthrough
+# Design Philosophy
 
-Welcome to **Sudoku Master**! This guide will help you understand the features of the application and how to use them effectively.
+Welcome to **Sudoku Solver**! This document outlines the rationale behind the project, the problems it solves, and the principles that guided its development.
 
-## Project Overview
-Sudoku Master is a modern, web-based tool designed to help you solve, validate, and play Sudoku puzzles. It features a sleek interface with dark mode support, real-time error detection, and a powerful solving engine.
+## 🎯 Problem Statement
+Sudoku puzzles can be challenging to solve and even more challenging to validate manually. Traditional paper-based Sudoku lacks real-time feedback, making it easy to commit errors that are only discovered much later. Additionally, many online solvers are either too complex or lack a clean, distraction-free environment.
+
+## 💡 Why This Solution?
+This Sudoku Solver was built to bridge the gap between a pure solver and a playable game. By combining a high-performance **backtracking algorithm** with a modern **React-based UI**, it provides:
+- **Immediate Feedback**: Instant conflict detection.
+- **Accessibility**: Support for multiple grid sizes (6x6 and 9x9).
+- **Educational Value**: A clear implementation of a classic constraint satisfaction algorithm.
+
+## 🎨 Design Principles
+1. **Simplicity Over Complexity**: A clean, "premium" interface that focuses on the grid.
+2. **Lightning Speed**: Algorithm performance optimized for sub-millisecond solving.
+3. **No Placeholders**: Every feature, from the hint system to history logging, is fully functional and persists across sessions.
+4. **Offline First**: All logic runs in the browser—no backend required.
+
+## 👥 Target Users
+- **Sudoku Enthusiasts**: Players looking for a fast, reliable tool to play or solve puzzles.
+- **Students & Developers**: Those looking for a production-grade example of a backtracking algorithm and React/TypeScript integration.
+
+---
+
+## Technical Details
+For developers who want to dive into the codebase:
+
+[Open Code Documentation](./CODE_DOCUMENTATION.md)
+
 
 ## Features
 
@@ -39,14 +63,8 @@ Sudoku Master is a modern, web-based tool designed to help you solve, validate, 
 - **Sizes**: Switch between standard **9x9** and easier **6x6** grids.
 - **Dynamic Rules**: The "How to Play" section updates automatically based on the selected grid size to show rules for 3x3 or 2x3 regions.
 - **Themes**: Toggle between Light and Dark modes.
-- **Brand**: Look for our custom Sudoku Master favicon in your browser tab!
+- **Brand**: Look for our custom Sudoku Solver favicon in your browser tab!
 
-## Technical Details
-For developers or curious users who want to understand how the code works, please check our detailed technical guide:
+---
+[Open Code Documentation](./CODE_DOCUMENTATION.md)
 
-[Open Code Walkthrough](./codewalkthrough.md)
-
-This technical guide covers:
-- File structure explanation
-- Key algorithms used (Backtracking)
-- Component breakdown
