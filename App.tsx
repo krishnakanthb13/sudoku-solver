@@ -10,10 +10,10 @@ const HISTORY_STORAGE_KEY = 'sudoku-solver-history-v2'; // Bumped version for ne
 
 const App: React.FC = () => {
   const [darkMode, setDarkMode] = useState(true);
-  const [size, setSize] = useState<SudokuSize>(9);
+  const [size, setSize] = useState<SudokuSize>(6);
 
   // Grid state
-  const [grid, setGrid] = useState<Grid>(createEmptyGrid(9));
+  const [grid, setGrid] = useState<Grid>(createEmptyGrid(6));
   const [initialCells, setInitialCells] = useState<Set<string>>(new Set());
 
   // Status state
@@ -276,6 +276,7 @@ const App: React.FC = () => {
         isOpen={isGeneratorOpen}
         onClose={() => setIsGeneratorOpen(false)}
         onGenerate={handleGenerate}
+        defaultSize={size}
       />
 
       {/* Header */}

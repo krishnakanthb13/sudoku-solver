@@ -6,15 +6,23 @@ interface GeneratorModalProps {
     isOpen: boolean;
     onClose: () => void;
     onGenerate: (size: SudokuSize, difficulty: Difficulty) => void;
+    defaultSize?: SudokuSize;
 }
 
 const GeneratorModal: React.FC<GeneratorModalProps> = ({
     isOpen,
     onClose,
-    onGenerate
+    onGenerate,
+    defaultSize = 6
 }) => {
-    const [size, setSize] = useState<SudokuSize>(9);
+    const [size, setSize] = React.useState<SudokuSize>(defaultSize);
     const [difficulty, setDifficulty] = useState<Difficulty>('Medium');
+
+    React.useEffect(() => {
+        if (isOpen) {
+            setSize(defaultSize);
+        }
+    }, [isOpen, defaultSize]);
 
     if (!isOpen) return null;
 
