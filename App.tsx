@@ -9,11 +9,19 @@ import { Play, Trash2, CheckCircle, AlertCircle, Moon, Sun, Timer, Grid3X3, Hist
 const HISTORY_STORAGE_KEY = 'sudoku-solver-history-v2'; // Bumped version for new schema
 
 const App: React.FC = () => {
-  const [darkMode, setDarkMode] = useState(true);
-  const [size, setSize] = useState<SudokuSize>(6);
+  const [darkMode, setDarkMode] = useState(() => {
+    // Initialize from localStorage or fallback to system preference
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('theme');
+      if (saved) return saved === 'dark';
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    return true;
+  });
+  const [size, setSize] = useState<SudokuSize>(9);
 
   // Grid state
-  const [grid, setGrid] = useState<Grid>(createEmptyGrid(6));
+  const [grid, setGrid] = useState<Grid>(createEmptyGrid(9));
   const [initialCells, setInitialCells] = useState<Set<string>>(new Set());
 
   // Status state
@@ -28,15 +36,8 @@ const App: React.FC = () => {
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
 
-  // Initialize Theme and History on Mount
+  // Initialize History on Mount
   useEffect(() => {
-    // Theme
-    const savedTheme = localStorage.getItem('theme');
-    const isDark = savedTheme !== 'light';
-    setDarkMode(isDark);
-    if (isDark) document.documentElement.classList.add('dark');
-    else document.documentElement.classList.remove('dark');
-
     // Load History
     const savedHistory = localStorage.getItem(HISTORY_STORAGE_KEY);
     if (savedHistory) {
@@ -454,7 +455,7 @@ const App: React.FC = () => {
             )}
           </ul>
         </div>
-        <div className="text-slate-400 dark:text-slate-500 text-xs font-medium animate-pulse">
+        <div className="text-slate-400 dark:text-slate-500 text-xs font-medium animate-pulse footer-glow-green">
           Built with 🧠, ☕ and 🤖 AI by Krishna Kanth B
         </div>
       </footer>
