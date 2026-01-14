@@ -66,5 +66,15 @@ For developers who want to dive into the codebase:
 - **Brand**: Look for our custom Sudoku Solver favicon in your browser tab!
 
 ---
+
+## 🧠 Behind the Scenes: Solver & Generator
+
+### 🔍 The Solver (Simple Terms)
+The solver is like a master of "What If?". It tries a number in a blank spot and asks, "What if I put a 5 here?". If it works, it moves on. If it later discovers that the 5 caused a problem elsewhere, it comes back, erases it, and tries a 6 instead. It repeats this process at lightning speed until the puzzle is solved.
+
+### 🎲 The Generator (Simple Terms)
+Our generator is an artist that starts with a finished masterpiece, but it's a new masterpiece every time! It creates a completely unique, valid Sudoku grid from scratch using randomized numbers. Then, it strategically erases numbers to create a puzzle for you. An **Easy** puzzle is like a sketch with most of the lines already drawn, while a **Hard** puzzle is just a few dots that you have to connect yourself—and you'll never get the same dots twice.
+
+---
 [Open Code Documentation](./CODE_DOCUMENTATION.md)
 

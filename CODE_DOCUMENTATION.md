@@ -102,6 +102,17 @@ The application follows a standard **React Component Architecture** combined wit
 - **LocalStorage API**: For persistent history and theme settings.
 
 ---
+
+## 🏗️ How the Solver and Generator Work
+
+### 🔍 The Solver (Simple Terms)
+The solver works like a very patient player. It picks an empty square, tries a number, and if it doesn't break any rules, it moves to the next square. If it eventually finds it can't place any number in a square, it realizes it made a mistake earlier, goes back to the previous square, and tries a different number. This "Backtracking" continues until the whole board is filled correctly.
+
+### 🎲 The Generator (Simple Terms)
+To create a new puzzle, the app first uses the solver to build a perfectly finished board from scratch using random numbers. Once it has a completed board, it begins "digging holes" by removing numbers one by one. For an **Easy** puzzle, it leaves many numbers; for a **Hard** puzzle, it removes almost everything, leaving just enough for you to solve it!
+- **Ensuring Uniqueness**: The search engine uses a Fisher-Yates shuffle on the numbers 1-9 during the "Full Solve" phase, which combined with random cell removal, ensures that the same puzzle is virtually never generated twice.
+
+---
 [Return to Design Philosophy](./DESIGN_PHILOSOPHY.md)
 
 
