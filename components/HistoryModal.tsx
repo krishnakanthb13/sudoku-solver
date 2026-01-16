@@ -59,8 +59,7 @@ const HistoryModal: React.FC<HistoryModalProps> = ({
     // Sort history by timestamp descending (New -> Old)
     const sortedHistory = [...history].sort((a, b) => b.timestamp - a.timestamp);
 
-    sortedHistory.slice(0, 100).forEach((item, index) => {
-      logContent += `Entry #${index + 1}\n`;
+    sortedHistory.slice(0, 100).forEach((item) => {
       logContent += `Time: ${new Date(item.timestamp).toLocaleString()}\n`;
       logContent += `Grid Size: ${item.size}x${item.size}\n`;
       logContent += `Solve Duration: ${formatDuration(item.duration)}\n`;
