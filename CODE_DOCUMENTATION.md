@@ -46,6 +46,16 @@ The primary goal of the recent updates was to transform the Sudoku Solver from a
 - **run_app.bat**
   - **Purpose**: Helper script to install dependencies and start the dev server for Windows users.
 
+---
+
+## 🛠️ Environment Configuration
+Sudoku Solver is designed to be **100% Offline-First**. 
+- **No `.env` files required**: All logic, including solving and puzzle generation, runs locally in the browser.
+- **Privacy**: No data is sent to external servers or AI providers.
+- **Build**: The `vite.config.ts` is pre-configured to handle all dependencies without external API keys.
+
+---
+
 ### /components
 *Reusable UI building blocks.*
 
